@@ -1,45 +1,102 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Event Sign-In</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Sign-In Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input, textarea, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .message {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
+
   <h2>Event Sign-In</h2>
   <form id="eventForm">
-    <input type="text" name="name" placeholder="Name" required><br>
-    <input type="email" name="email" placeholder="Email" required><br>
-    <input type="tel" name="phone" placeholder="Phone" required><br>
-    <input type="text" name="city" placeholder="City" required><br>
-    <textarea name="comments" placeholder="Comments"></textarea><br>
+    <input type="text" name="name" placeholder="Name" required />
+    <input type="email" name="email" placeholder="Email" required />
+    <input type="tel" name="phone" placeholder="Phone Number" required />
+    <input type="text" name="city" placeholder="City" />
+    <textarea name="comments" placeholder="Comments"></textarea>
     <button type="submit">Submit</button>
+    <div class="message" id="message"></div>
   </form>
 
-  <p id="responseMsg"></p>
-
   <script>
-    document.getElementById('eventForm').addEventListener('submit', function(e) {
+    const form = document.getElementById('eventForm');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
+      const formData = {
+        name: form.name.value,
+        email: form.email.value,
+        phone: form.phone.value,
+        city: form.city.value,
+        comments: form.comments.value
+      };
 
-const response = await fetch("https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhNzJmR3Q9QR6mXjKMzBGpCYbfv51BinIran4LwfVLH1enT8J3H-GywO5AFZ2HXOxkdsLBakU9g4_s-7Q0ts04hX3eEt5LgAPdZZMrYKJazs3REZp6y2JnVhMXiu4Xev5FOrQnEdBkBTO-a32td5ttUbLq6IMpe6p8rrQRAClvFGJk4vG6HFDM8P5jgVOWrih5u8LoyZygILHxeFjQmbJ7GWBE4e1kLzDSuMLlpQS_-8aM9N0GiVKn59hQn3C8WbNljC2swoG9C6c8p81kC0hZ_3c-YnQ&lib=MZwhbazdZMXeIgzHP0SVwdSqbMsTEyGLk", {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json'
+      // 👇 Replace this with your actual Apps Script CORS-safe URL
+      const endpoint = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhNzJmR3Q9QR6mXjKMzBGpCYbfv51BinIran4LwfVLH1enT8J3H-GywO5AFZ2HXOxkdsLBakU9g4_s-7Q0ts04hX3eEt5LgAPdZZMrYKJazs3REZp6y2JnVhMXiu4Xev5FOrQnEdBkBTO-a32td5ttUbLq6IMpe6p8rrQRAClvFGJk4vG6HFDM8P5jgVOWrih5u8LoyZygILHxeFjQmbJ7GWBE4e1kLzDSuMLlpQS_-8aM9N0GiVKn59hQn3C8WbNljC2swoG9C6c8p81kC0hZ_3c-YnQ&amp;lib=MZwhbazdZMXeIgzHP0SVwdSqbMsTEyGLk";
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          message.textContent = "✅ Submission successful!";
+          form.reset();
+        } else {
+          message.textContent = "❌ Submission failed. Try again.";
         }
-      })
-      .then(res => res.json())
-      .then(res => {
-        document.getElementById('responseMsg').textContent = res.success ? 'Thank you!' : 'Error submitting form';
-        this.reset();
-      })
-      .catch(() => document.getElementById('responseMsg').textContent = 'Submission failed.');
+      } catch (error) {
+        console.error(error);
+        message.textContent = "⚠️ Network error. Please try later.";
+      }
     });
   </script>
+
 </body>
 </html>
