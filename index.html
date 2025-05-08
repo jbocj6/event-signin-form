@@ -2,98 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Event Sign-In Form-bravo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Event Sign-In Form</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
       max-width: 600px;
-      margin: auto;
+      margin: 50px auto;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      background-color: #f9f9f9;
     }
-
     h2 {
       text-align: center;
     }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
+    label {
+      display: block;
+      margin-top: 15px;
     }
-
-    input, textarea, button {
+    input, textarea {
+      width: 100%;
       padding: 10px;
-      font-size: 16px;
+      margin-top: 5px;
+      box-sizing: border-box;
     }
-
     button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
       background-color: #4CAF50;
       color: white;
       border: none;
       cursor: pointer;
     }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    .message {
-      margin-top: 15px;
-      text-align: center;
+    #message {
+      margin-top: 20px;
       font-weight: bold;
+      color: green;
+    }
+    #error {
+      color: red;
     }
   </style>
 </head>
 <body>
 
-  <h1>Event Sign-In</h1>
-  <form id="eventForm">
-    <input type="text" name="name" placeholder="Name" required />
-    <input type="email" name="email" placeholder="Email" required />
-    <input type="tel" name="phone" placeholder="Phone Number" required />
-    <input type="text" name="city" placeholder="City" />
-    <textarea name="comments" placeholder="Comments"></textarea>
+  <h2>Event Sign-In</h2>
+  <form id="event-form">
+    <label>Name: <input type="text" name="name" required /></label>
+    <label>Email: <input type="email" name="email" required /></label>
+    <label>Phone: <input type="tel" name="phone" required /></label>
+    <label>City: <input type="text" name="city" required /></label>
+    <label>Comments: <textarea name="comments" rows="3"></textarea></label>
     <button type="submit">Submit</button>
-    <div class="message" id="message"></div>
+    <div id="message"></div>
   </form>
 
   <script>
-    const form = document.getElementById('eventForm');
+    const form = document.getElementById('event-form');
     const message = document.getElementById('message');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      message.textContent = '';
 
-      const formData = {
-        name: form.name.value,
-        email: form.email.value,
-        phone: form.phone.value,
-        city: form.city.value,
-        comments: form.comments.value
-      };
-
-      // 👇 Replace this with your actual Apps Script CORS-safe URL
-      const endpoint = "https://script.google.com/macros/s/AKfycbxayV5eKx1EgKGfVaCEJFbTnSRezbBrC03oTNeD43neFO4ww8Q_2_KXvL6QaTP8DZhvgQ/exec";
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => data[key] = value);
 
       try {
-        const response = await fetch(endpoint, {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbxayV5eKx1EgKGfVaCEJFbTnSRezbBrC03oTNeD43neFO4ww8Q_2_KXvL6QaTP8DZhvgQ/exec', {
           method: 'POST',
+          mode: 'no-cors', // for Google Apps Script CORS workaround
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify(data)
         });
 
-        if (response.ok) {
-          message.textContent = "✅ Submission successful!";
-          form.reset();
-        } else {
-          message.textContent = "❌ Submission failed. Try again.";
-        }
+        // Show success message (can't check response with no-cors)
+        message.innerHTML = '✅ Submission successful! Thank you.';
+        form.reset();
+
       } catch (error) {
+        message.innerHTML = '<span id="error">⚠️ Network error. Please try later.</span>';
         console.error(error);
-        message.textContent = "⚠️ Network error. Please try later.";
       }
     });
   </script>
